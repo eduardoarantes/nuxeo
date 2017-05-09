@@ -43,6 +43,7 @@ import org.nuxeo.ecm.platform.login.test.ClientLoginFeature;
 import org.nuxeo.ecm.platform.login.test.DummyNuxeoLoginModule;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 import org.nuxeo.runtime.test.runner.RuntimeHarness;
 
 /**
@@ -50,25 +51,15 @@ import org.nuxeo.runtime.test.runner.RuntimeHarness;
  */
 @RunWith(FeaturesRunner.class)
 @Features({ DirectoryFeature.class, ClientLoginFeature.class })
+@LocalDeploy({ "org.nuxeo.ecm.directory.tests:test-directories-schema-override.xml",
+        "org.nuxeo.ecm.directory.tests:test-directories-bundle.xml" })
 public class TestDirectorySecurityDefault {
-
-    @Inject
-    protected RuntimeHarness harness;
-
-    @Inject
-    protected DirectoryFeature feature;
 
     @Inject
     protected DirectoryService directoryService;
 
     @Inject
     ClientLoginFeature dummyLogin;
-
-    @Before
-    public void setUp() throws Exception {
-        harness.deployContrib(feature.getTestBundleName(), "test-sql-directories-schema-override.xml");
-        harness.deployContrib(feature.getTestBundleName(), "test-sql-directories-bundle.xml");
-    }
 
     public Session getSession() throws Exception {
         return directoryService.open(DirectoryFeature.USER_DIRECTORY_NAME);

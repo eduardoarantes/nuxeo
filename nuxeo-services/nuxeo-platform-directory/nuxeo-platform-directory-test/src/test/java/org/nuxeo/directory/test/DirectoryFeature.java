@@ -72,10 +72,6 @@ public class DirectoryFeature extends SimpleFeature {
 
     protected Map<String, Map<String, Map<String, Object>>> allDirectoryData;
 
-    protected String testBundle;
-
-    protected DirectoryService directoryService;
-
     @Override
     public void beforeRun(FeaturesRunner runner) throws Exception {
         granularity = runner.getFeature(CoreFeature.class).getGranularity();
@@ -93,7 +89,7 @@ public class DirectoryFeature extends SimpleFeature {
         directoryConfiguration = new DirectoryConfiguration(coreFeature.getStorageConfiguration());
         directoryConfiguration.init();
         try {
-            testBundle = directoryConfiguration.deployBundles(runner);
+            directoryConfiguration.deployContrib(runner);
         } catch (Exception e) {
             throw new NuxeoException(e);
         }
@@ -101,16 +97,12 @@ public class DirectoryFeature extends SimpleFeature {
 
     @Override
     public void beforeSetup(FeaturesRunner runner) throws Exception {
-        directoryService = Framework.getService(DirectoryService.class);
-    }
-
-    @Override
-    public void beforeMethodRun(FeaturesRunner runner, FrameworkMethod method, Object test) throws Exception {
         if (granularity != Granularity.METHOD) {
             return;
         }
         // record all directories in their entirety
         allDirectoryData = new HashMap<>();
+        DirectoryService directoryService = Framework.getService(DirectoryService.class);
         for (Directory dir : directoryService.getDirectories()) {
             if (dir.isReadOnly()) {
                 continue;
@@ -140,9 +132,9 @@ public class DirectoryFeature extends SimpleFeature {
             return;
         }
         // system user to bypass directory security
-        // system user to bypass directory security
         LoginStack loginStack = ClientLoginModule.getThreadLocalLogin();
         loginStack.push(new SystemPrincipal(null), null, null);
+        DirectoryService directoryService = Framework.getService(DirectoryService.class);
         try {
             // clear all directories
             boolean isAllClear;
@@ -189,13 +181,9 @@ public class DirectoryFeature extends SimpleFeature {
         allDirectoryData = null;
     }
 
-    protected String getTestBundleName() {
-        return testBundle;
-    }
-
     protected void bindDirectory(Binder binder, final String name) {
         binder.bind(Directory.class).annotatedWith(Names.named(name)).toProvider(
-                () -> directoryService.getDirectory(name));
+                () -> Framework.getService(DirectoryService.class).getDirectory(name));
     }
 
 }

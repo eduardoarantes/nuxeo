@@ -21,11 +21,8 @@
 package org.nuxeo.directory.test;
 
 import org.junit.runner.RunWith;
-import org.nuxeo.ecm.directory.sql.SQLDirectoryFeature;
-import org.nuxeo.ecm.directory.sql.SQLDirectoryTestSuite;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
-import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
  * Tests from the DirectoryTestSuite but with directory configuration defined through a template indirection.
@@ -35,11 +32,5 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 @RunWith(FeaturesRunner.class)
 @Features(DirectoryFeature.class)
 public class TestDirectoryTemplate extends DirectoryTestSuite {
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        harness.deployContrib(feature.getTestBundleName(), "test-sql-directories-from-template.xml");
-    }
 
 }

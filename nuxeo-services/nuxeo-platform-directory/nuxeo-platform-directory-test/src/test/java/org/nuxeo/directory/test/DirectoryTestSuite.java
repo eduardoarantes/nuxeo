@@ -41,7 +41,6 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.nuxeo.ecm.core.api.DocumentModel;
@@ -58,9 +57,13 @@ import org.nuxeo.ecm.directory.Reference;
 import org.nuxeo.ecm.directory.Session;
 import org.nuxeo.ecm.directory.api.DirectoryService;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
-import org.nuxeo.runtime.test.runner.RuntimeHarness;
 
+/**
+ * @since 9.2
+ */
 @RepositoryConfig(cleanup = Granularity.METHOD)
+@LocalDeploy({ "org.nuxeo.ecm.directory.tests:test-directories-schema-override.xml",
+        "org.nuxeo.ecm.directory.tests:test-directories-bundle.xml" })
 public abstract class DirectoryTestSuite {
 
     protected static final String USER_DIR = "userDirectory";
@@ -70,19 +73,7 @@ public abstract class DirectoryTestSuite {
     protected static final String SCHEMA = "user";
 
     @Inject
-    protected RuntimeHarness harness;
-
-    @Inject
-    protected DirectoryFeature feature;
-
-    @Inject
     protected DirectoryService directoryService;
-
-    @Before
-    public void setUp() throws Exception {
-        harness.deployContrib(feature.getTestBundleName(), "test-sql-directories-schema-override.xml");
-        harness.deployContrib(feature.getTestBundleName(), "test-sql-directories-bundle.xml");
-    }
 
     public static Calendar getCalendar(int year, int month, int day, int hours, int minutes, int seconds,
             int milliseconds) {
@@ -391,7 +382,6 @@ public abstract class DirectoryTestSuite {
             DocumentModel group1 = session.getEntry("group_1");
             List<String> members = (List<String>) group1.getProperty("group", "members");
             assertTrue(members.isEmpty());
-            // assertFalse(members.contains("group_1"));
         }
     }
 
@@ -407,7 +397,7 @@ public abstract class DirectoryTestSuite {
             // create a second entry with user_1 as key but with
             // a different email (would be "parent" in a hierarchical
             // vocabulary)
-            Map<String, Object> entryMap = new HashMap<String, Object>();
+            Map<String, Object> entryMap = new HashMap<>();
             entryMap.put("username", "user_1");
             entryMap.put("email", "second@email");
             DocumentModel dm = session.createEntry(entryMap);
@@ -445,7 +435,7 @@ public abstract class DirectoryTestSuite {
     @Test
     public void testQuery1() throws Exception {
         try (Session session = getSession()) {
-            Map<String, Serializable> filter = new HashMap<String, Serializable>();
+            Map<String, Serializable> filter = new HashMap<>();
             filter.put("username", "user_1");
             filter.put("firstName", "f");
             DocumentModelList list = session.query(filter);
@@ -479,7 +469,7 @@ public abstract class DirectoryTestSuite {
     @Test
     public void testQuerySubAny() throws Exception {
         try (Session session = getSession()) {
-            Map<String, Serializable> filter = new HashMap<String, Serializable>();
+            Map<String, Serializable> filter = new HashMap<>();
             filter.put("username", "er_");
             Set<String> set = new HashSet<String>();
             set.add("username");
@@ -508,7 +498,7 @@ public abstract class DirectoryTestSuite {
     @Test
     public void testQueryCaseInsensitive() throws Exception {
         try (Session session = getSession()) {
-            Map<String, Serializable> filter = new HashMap<String, Serializable>();
+            Map<String, Serializable> filter = new HashMap<>();
             // case insensitive substring search
             filter.put("username", "admini");
             DocumentModelList list = session.query(filter, filter.keySet());
@@ -521,7 +511,7 @@ public abstract class DirectoryTestSuite {
     @Test
     public void testGetProjection() throws Exception {
         try (Session session = getSession()) {
-            Map<String, Serializable> filter = new HashMap<String, Serializable>();
+            Map<String, Serializable> filter = new HashMap<>();
             filter.put("username", "user_1");
             List<String> list = session.getProjection(filter, "firstName");
             assertEquals(1, list.size());
@@ -532,7 +522,7 @@ public abstract class DirectoryTestSuite {
     @Test
     public void testSearch() throws Exception {
         try (Session session = getSession()) {
-            Map<String, Serializable> filter = new HashMap<String, Serializable>();
+            Map<String, Serializable> filter = new HashMap<>();
 
             // exact match
             filter.put("username", "u");
@@ -676,7 +666,7 @@ public abstract class DirectoryTestSuite {
     @Test
     public void testPasswordIgnoredInQueryFilter() throws Exception {
         try (Session session = getSession()) {
-            Map<String, Serializable> filter = new HashMap<String, Serializable>();
+            Map<String, Serializable> filter = new HashMap<>();
             filter.put("username", "user_1");
             filter.put("password", "nosuchpassword");
             DocumentModelList list = session.query(filter);
